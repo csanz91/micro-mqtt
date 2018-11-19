@@ -3,9 +3,27 @@
  */
 
 // @ts-ignore
-import { NodeClient } from './nodetest';
+import { NodeClient } from './NodeClient';
 import { Client } from '../module/micro-mqtt';
-import IMessage from '../module/IMessage';
+
+// tslint:disable-next-line: promise-function-async
+const waitMax10SecondsFor: (expression: () => boolean) => Promise<void> = (expression: () => boolean): Promise<void> => {
+    // tslint:disable-next-line:promise-must-complete typedef
+    return new Promise((resolve) => {
+        let attempts: number = 1;
+        const poll: () => void = (): void => {
+            setTimeout(() => {
+                if (expression() || attempts > 100) {
+                    resolve();
+                } else {
+                    attempts = attempts + 1;
+                    poll();
+                }
+            },         100);
+        };
+        poll();
+    });
+};
 
 describe('The MQTT client', () => {
     let client: Client;
@@ -17,13 +35,14 @@ describe('The MQTT client', () => {
             host: 'test.mosquitto.org',
             clientId: 'micro-mqtt',
             will: {
-                topic: 'rovale/espruino/status',
+                topic: 'rovale/micro-mqtt/status',
                 message: 'offline',
                 qos: 1,
                 retain: true
             }
         });
 
+        isConnected = false;
         client.on('connected', () => {
             isConnected = true;
         });
@@ -33,29 +52,9 @@ describe('The MQTT client', () => {
         client.disconnect();
     });
 
-    // tslint:disable-next-line promise-function-async
-    it('should be able to connect to an MQTT broker.', () => {
-        // tslint:disable-next-line:typedef promise-function-async
-        const connect = (): Promise<boolean> => {
-            // tslint:disable-next-line:promise-must-complete typedef
-            return new Promise((resolve) => {
-                const poll: () => void = (): void => {
-                    setTimeout(() => {
-                        if (isConnected) {
-                            resolve(isConnected);
-                        } else {
-                            poll();
-                        }
-                    },         100);
-                };
-
-                client.connect();
-                poll();
-            });
-        };
-
-        return connect().then((result: boolean) => {
-            expect(result).toBe(true);
-        });
+    it('should be able to connect to an MQTT broker.', async () => {
+        client.connect();
+        await waitMax10SecondsFor(() => isConnected);
+        expect(isConnected).toBe(true);
     });
 });
