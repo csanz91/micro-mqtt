@@ -1,5 +1,4 @@
 var events = require('events');
-var net = require('net');
 var Client = require('../../espruino/modules/micro-mqtt').Client;
 
 class NodeEventEmitter extends events.EventEmitter {
@@ -29,39 +28,41 @@ class NodeClient extends Client {
     }
 }
 
-var client = new NodeClient({
-    host: 'pi',
-    clientId: 'micro-mqtt',
-    will: {
-        topic: 'rovale/espruino/status',
-        message: 'offline',
-        qos: 1,
-        retain: true
-    },
-});
+exports.NodeClient = NodeClient;
 
-client.on('connected', () => {
-    client.subscribe('rovale/#', 1);
-    client.publish('rovale/espruino/status', 'online', 1, true);
-});
+// var client = new NodeClient({
+//     host: 'pi',
+//     clientId: 'micro-mqtt',
+//     will: {
+//         topic: 'rovale/espruino/status',
+//         message: 'offline',
+//         qos: 1,
+//         retain: true
+//     },
+// });
 
-client.on('receive', (message) => {
-    console.log('on receive');
-    console.log(message);
-});
+// client.on('connected', () => {
+//     client.subscribe('rovale/#', 1);
+//     client.publish('rovale/espruino/status', 'online', 1, true);
+// });
 
-client.on('debug', (debug) => {
-    console.log('[debug] ' + debug);
-});
+// client.on('receive', (message) => {
+//     console.log('on receive');
+//     console.log(message);
+// });
 
-client.on('info', (info) => {
-    console.log('[info] ' + info);
-});
+// client.on('debug', (debug) => {
+//     console.log('[debug] ' + debug);
+// });
 
-client.on('error', (error) => {
-    console.log('[error] ' + error);
-});
+// client.on('info', (info) => {
+//     console.log('[info] ' + info);
+// });
 
-client.connect();
+// client.on('error', (error) => {
+//     console.log('[error] ' + error);
+// });
 
-global.client = client;
+// client.connect();
+
+// global.client = client;

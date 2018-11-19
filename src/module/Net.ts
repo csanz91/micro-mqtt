@@ -7,7 +7,6 @@ export interface INetConnectOptions {
 }
 
 export interface ISocket {
-    setEncoding(encoding: string): void;
     write(data: string): void;
     on(event: string, listener: (args: string) => void): void;
     removeAllListeners(event: string): void;
